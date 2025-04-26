@@ -1,183 +1,29 @@
-# 📘Concurrent and Distributed Systems (Part 1: Concurrent Programming)
+ ---
 
-## 🧵 1. Introduction to Concurrent Programming
-
-### ➡️ What is Concurrent Programming?
-
-Concurrent Programming enables a system to execute **multiple tasks simultaneously**.
-
-> ⚡ **Sequential Programming**: Only one task at a time (Single-threaded by default in Java).
->  
-> ⚡ **Concurrent Programming**: Multiple tasks operate at the same time, usually using **threads**.
-
----
-  
-### 📜 Basic Definitions
-
-- **Program**: A set of instructions.
-- **Process**: A program in execution, with its **own memory and resources**.
-- **Thread**: A lightweight sub-process that shares the memory of its process.
-
-**➡ In Java:**
-- Every Java application starts with a **single process** (your program).
-- Inside the process, you can create **multiple threads** to achieve concurrency.
+# 🧵 **  Concurrent and Distributed Systems**  
+## 📘 Lecture 02 – Thread Life Cycle & Java Locking Mechanisms
 
 ---
 
-### 🧠 Why Threads Instead of Processes?
+## 🧩 PART 1: Java Locking Mechanisms
 
-| Process | Thread |
-|:-------|:-------|
-| Heavyweight | Lightweight |
-| Separate memory space | Shared memory space |
-| Expensive context switching | Cheap context switching |
-| Harder communication | Easier communication |
+### 🔐 1. What is a Lock?
+
+A **lock** is a concurrency control mechanism used to **restrict access** to shared resources (like objects or variables) so that **only one thread** can access a **critical section** at a time.
 
 ---
 
-### 🎓 Analogy to Understand
+## 🔒 2. Types of Locks in Java
 
-Imagine you are a lecturer accidentally scheduling two batches at the same time:
-
-| Scenario | Analogy | Relates To |
-|:--------|:--------|:----------|
-| Two batches in separate rooms, running back and forth | High switching overhead | Separate Processes |
-| Two batches in a large single room | Easy to manage | Threads |
-
----
-
-## 👨‍💻 2. How to Create Threads in Java
-
-There are three ways to create threads:
-
-### ✅ 1. Extending `Thread` class
-
-```java
-class MyThread extends Thread {
-    public void run() {
-        System.out.println("Thread running...");
-    }
-}
-```
-
-**Cons**:
-- Java does **not support multiple inheritance**.
-- You lose flexibility if you extend `Thread`.
+| Lock Type | Description | Package/Class |
+|-----------|-------------|----------------|
+| **Synchronized** (Intrinsic Lock) | Built-in locking mechanism | `synchronized` keyword |
+| **ReentrantLock** (Extrinsic Lock) | Explicit, flexible locking | `java.util.concurrent.locks.ReentrantLock` |
+| **ReentrantReadWriteLock** | Enables multiple reads and exclusive writes | `java.util.concurrent.locks.ReentrantReadWriteLock` |
 
 ---
 
-### ✅ 2. Implementing `Runnable` interface
-
-```java
-class MyRunnable implements Runnable {
-    public void run() {
-        System.out.println("Runnable running...");
-    }
-}
-```
-
-Then, create a `Thread` object:
-
-```java
-Runnable r = new MyRunnable();
-Thread t = new Thread(r);
-t.start();
-```
-
-> ✅ **Recommended Approach** for better design flexibility.
-
----
-
-### ✅ 3. Using Lambda Expressions (Java 8+)
-
-```java
-Thread t = new Thread(() -> {
-    System.out.println("Lambda Thread running...");
-});
-t.start();
-```
-
-> ✅ Great for **one-time-use** threads.
-
----
-
-## ⏳ 3. Thread Life Cycle
-
-| Stage | Description |
-|:------|:------------|
-| New | Thread object created |
-| Runnable | After `start()` called, ready to run |
-| Running | Thread is executing |
-| Blocked | Waiting for a lock/resource |
-| Terminated | Finished execution |
-
-**Important:**  
-Calling `.run()` directly does not create a new thread — it just behaves like a normal method.
-
----
-
-## 🕰️ 4. Thread Scheduling & Priority
-
-Even on a **single-core CPU**, concurrency is achieved through **time slicing**.
-
-### 🛠️ Key Points:
-
-- **Round-Robin Scheduling**: Threads get time slices (quanta) one after another.
-- **Priority-Based Preemption**:
-  - Higher priority threads may preempt lower priority ones.
-  - Java supports **fixed-priority preemptive scheduling**.
-
-```java
-t1.setPriority(Thread.MAX_PRIORITY);
-```
-
-> 🎯 **However, thread scheduling is not fully predictable.**
-
----
-
-## ⚔️ 5. Race Condition and Critical Section
-
-### ❓ What is a Race Condition?
-
-When **multiple threads** try to access and modify **shared resources** **simultaneously** without proper synchronization.
-
-### 📍 Example: Bank Account
-
-Shared Object: **BankAccount**
-
-Two threads:
-- Career Minded Wife (CMW) deposits money.
-- House Based Husband (HBH) withdraws money.
-
-**Problem Scenario:**
-
-| Step | CMW (Thread 1) | HBH (Thread 2) |
-|:----|:--------------|:--------------|
-| Read balance | 25000 | 25000 |
-| Update | +25000 | -25000 |
-| Write back | 50000 | 0 |
-
-**Expected balance** = 25000  
-**Actual balance** = 0 ❌
-
----
-
-### 🎯 Critical Section
-
-Any part of the code where shared data is accessed.
-
-**Examples**:
-- `getBalance()`
-- `deposit()`
-- `withdraw()`
-
-**Solution**: Synchronize the critical section to **allow only one thread** at a time.
-
----
-
-## 🔐 6. Synchronization (Locking)
-
-**Java Synchronization** is achieved using the `synchronized` keyword.
+### ✅ **Synchronized (Intrinsic Lock)**
 
 ```java
 public synchronized void deposit(double amount) {
@@ -185,90 +31,211 @@ public synchronized void deposit(double amount) {
 }
 ```
 
-**What happens when synchronized?**
-
-- Only one thread can access the method at a time.
-- Other threads are **BLOCKED** until the lock is released.
+- Automatically applied at the method or block level.
+- One thread at a time can enter the synchronized method or block.
 
 ---
 
-### 🏛️ Reader-Writer Problem (Classical Concurrency Problem)
-
-#### Rules:
-
-| Condition | Action |
-|:----------|:-------|
-| No writers active | Multiple readers allowed |
-| Writer active | No readers allowed |
-| Only one writer allowed | At a time |
-
-> ✅ Multiple readers are OK together.  
-> ❌ Writer and readers cannot operate together.
-
----
-
-## 💻 Java Example: `BankAccount` Class
+### ✅ **ReentrantLock (Extrinsic Lock)**
 
 ```java
-public class BankAccount {
-    private double balance;
-    private String accountID;
+ReentrantLock lock = new ReentrantLock();
 
-    public BankAccount(double balance, String accountID) {
-        this.balance = balance;
-        this.accountID = accountID;
-    }
-
-    public synchronized double getBalance() {
-        return balance;
-    }
-
-    public synchronized void deposit(double amount) {
-        if (amount > 0) balance += amount;
-        else throw new IllegalArgumentException("Invalid amount!");
-    }
-
-    public synchronized void withdraw(double amount) {
-        if (amount > 0 && balance - amount >= 0) balance -= amount;
-        else throw new IllegalArgumentException("Invalid or insufficient amount!");
-    }
+lock.lock();
+try {
+    // critical section
+} finally {
+    lock.unlock(); // Always release the lock
 }
 ```
 
-> 🏦 Here, `balance` is the **shared resource**.
+- **Manual control** over locking and unlocking.
+- More powerful than `synchronized`:
+  - Can attempt a timed lock (`tryLock()`).
+  - Can be interrupted while waiting for lock.
 
 ---
 
-## 🎯 Important Concepts Recap
+### 🤔 **What is Reentrancy?**
 
-| Concept          | Meaning |
-|:----------------|:---------|
-| Process         | Program in execution |
-| Thread          | Unit of execution within a process |
-| Critical Section| Shared code needing synchronization |
-| Race Condition  | Concurrent access leading to data corruption |
-| Synchronization | Locking mechanism to prevent race conditions |
-| Time Slicing    | Dividing CPU time among threads |
-| Preemptive Scheduling | Higher-priority thread preempts lower ones |
+> A lock is **reentrant** if a thread that already holds the lock can reacquire it again **without getting blocked**.
 
----
+### 💡 Example:
 
-# 🔥 Key Takeaways
+```java
+public synchronized void withdraw() {
+    // Acquires lock
+    getBalance(); // Also synchronized
+}
+```
 
-- Prefer **Runnable** over **Thread inheritance**.
-- Always protect shared data using **synchronization**.
-- Be cautious: **Thread execution order is non-deterministic**.
-- Race conditions can cause serious **data corruption**.
-- Threads share resources, **Processes do not**.
+- Thread calls `withdraw()`, which internally calls `getBalance()`.
+- Even though both methods are synchronized, the thread **won’t be blocked** when calling `getBalance()` — because it's the **same thread** re-entering the lock.
+
+Hence: **“Reentrant”** lock.
 
 ---
 
-# 📖 Coming Up Later in the Module
+### ✅ **ReentrantReadWriteLock**
 
-| Topic | Summary |
-|:------|:--------|
-| Thread Groups | Managing multiple threads together |
-| Monitor | Special mechanism for managing synchronization |
-| Semaphores | Advanced locking and thread signaling tool |
+#### 🔧 Key Features:
+- Designed for **Reader-Writer scenarios**.
+- Allows **multiple threads to read** if there is **no writer**.
+- Allows **only one writer**, and **no readers** during write.
 
+```java
+ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+ReadLock readLock = lock.readLock();
+WriteLock writeLock = lock.writeLock();
+```
 
+#### 🔍 Behavior Table:
+
+| State                | Allowed?  |
+|----------------------|-----------|
+| Multiple readers     | ✅ Yes     |
+| One writer           | ✅ Yes     |
+| Writer + readers     | ❌ No      |
+| Multiple writers     | ❌ No      |
+
+---
+
+## 🧩 PART 2: **Thread Life Cycle**
+
+A Java thread goes through **six main states** during its lifetime.
+
+---
+
+### 🔹 **1. NEW**
+
+- Thread is **created but not started**.
+```java
+Thread cmwThread = new Thread(cmw, "Career Minded Wife");
+```
+
+At this point, thread is in the **NEW** state.
+
+---
+
+### 🔹 **2. RUNNABLE**
+
+- Thread moves to this state after calling `.start()`.
+```java
+cmwThread.start();
+```
+
+- The thread is now **ready to run** but may not be running **immediately**.
+
+#### 🧠 Substates:
+- **READY**: Waiting for CPU allocation
+- **RUNNING**: Actually executing on CPU
+
+Note: In a **single-core system**, only one thread will run at a time (time slicing used).
+
+---
+
+### 🔹 **3. BLOCKED**
+
+- A thread is **blocked** if it tries to access a resource that is **locked by another thread**.
+- It stays here until the lock is released.
+
+#### 🔁 Transition:
+- From `RUNNABLE` ➡️ `BLOCKED`
+- Then back to `RUNNABLE` once lock is acquired
+
+---
+
+### 🔹 **4. WAITING**
+
+A thread enters WAITING when it **waits for another thread’s signal**.
+
+#### Triggered by:
+- `wait()`
+- `join()`
+
+#### Exits when:
+- Another thread calls `notify()` or `notifyAll()`.
+
+> ⚠️ This state has **no timeout** — it will wait indefinitely.
+
+---
+
+### 🔹 **5. TIMED_WAITING**
+
+Same as WAITING, but with a **time limit**.
+
+#### Triggered by:
+- `sleep(milliseconds)`
+- `join(milliseconds)`
+- `wait(milliseconds)`
+
+```java
+Thread.sleep(100); // Pauses thread for 100ms
+```
+
+Once time expires → back to **RUNNABLE**
+
+---
+
+### 🔹 **6. TERMINATED (DEAD)**
+
+When `run()` completes, the thread moves to **TERMINATED** state.
+
+> It cannot be restarted.
+
+---
+
+## 🔁 Thread Life Cycle Summary Diagram (Text-Based)
+
+```
+NEW --> RUNNABLE --> RUNNING --> TERMINATED
+         |   ↑         ↓
+         ↓   |       BLOCKED
+      WAITING / TIMED_WAITING
+```
+
+---
+
+## 🛠️ Thread Lifecycle Example
+
+```java
+Runnable cmw = new CMWRunnable();
+Thread cmwThread = new Thread(cmw, "Career Minded Wife");
+
+cmwThread.start(); // NEW -> RUNNABLE
+
+// Inside run():
+Thread.sleep(100); // RUNNABLE -> TIMED_WAITING
+
+// Waiting for HBH to finish:
+hbhThread.join(); // RUNNABLE -> WAITING
+
+// Uses synchronized method:
+account.deposit(); // May go to BLOCKED if lock not available
+
+// run() completes:
+TERMINATED
+```
+
+---
+
+## 🧠 Summary Table: Lock Types
+
+| Lock Type             | Supports Reentrancy | Allows Multiple Readers | Requires Manual Unlock |
+|------------------------|---------------------|--------------------------|-------------------------|
+| `synchronized`         | ✅ Yes               | ❌ No                    | ❌ No                   |
+| `ReentrantLock`        | ✅ Yes               | ❌ No                    | ✅ Yes                  |
+| `ReentrantReadWriteLock` | ✅ Yes            | ✅ Yes (ReadLock)        | ✅ Yes                  |
+
+---
+
+## ✅ Final Key Takeaways
+
+- Java provides **intrinsic (`synchronized`)** and **explicit (`ReentrantLock`)** locking.
+- Use `ReentrantReadWriteLock` for **reader-writer problems**.
+- Threads go through six main **lifecycle states**.
+- Use **locks wisely** to prevent race conditions and ensure data consistency.
+- Always **release locks** in a `finally` block when using `ReentrantLock`.
+
+---
+ 
