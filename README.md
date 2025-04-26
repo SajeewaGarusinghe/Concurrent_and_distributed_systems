@@ -1,19 +1,5 @@
 # 📘Concurrent and Distributed Systems (Part 1: Concurrent Programming)
 
----
-
-## 📋 Module Structure
-
-- **Part 1**: **Concurrent Programming** (Lecturer: Mr. Guhanathan P)
-  - Duration: 6–7 weeks
-  - Coursework Assignment: **50%**
-- **Part 2**: **Distributed Systems** (Lecturer: Mr. Sajith)
-  - Coursework Assignment: **50%**
-
-*This note covers **Part 1: Concurrent Programming.***
-
----
-
 ## 🧵 1. Introduction to Concurrent Programming
 
 ### ➡️ What is Concurrent Programming?
