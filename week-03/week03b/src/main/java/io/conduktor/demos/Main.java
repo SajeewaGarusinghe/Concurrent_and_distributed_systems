@@ -1,0 +1,87 @@
+package io.conduktor.demos;
+
+public class Main {
+
+	public static void main(String[] args) {
+		MailBox mailBox = new MailBox();
+		Runnable producer = new Producer(mailBox);
+		Runnable consumer = new Consumer(mailBox);
+		
+		Thread producerThread = new Thread(producer, "Producer"); // Thread is in NEW state
+		Thread consumerThread = new Thread(consumer, "Consumer"); // Thread is in NEW state 
+		
+		System.out.println("The current state of Producer Thread is "+ producerThread.getState());// NEW
+		System.out.println("The current state of Consumer Thread is "+ consumerThread.getState());// NEW
+		
+		producerThread.start();
+		consumerThread.start();
+		
+		System.out.println("The current state of Producer Thread after start() method is "+ producerThread.getState());// RUNNABLE
+		System.out.println("The current state of Consumer Thread after start() method is "+ consumerThread.getState());// RUNNABLE
+		
+		// what is the current thread at this point?
+		// main
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		// since I have put the current thread which is main thread to sleep for 1000ms by which time producer and 
+		// consumer completed the execution of their respective run()
+		// once the run() method execution is over thread goes into TERMINATED state
+		System.out.println("The current state of Producer Thread at end of main method is "+ producerThread.getState());// TERMINATED
+		System.out.println("The current state of Consumer Thread at end of main method is "+ consumerThread.getState());//TERMINATED
+		
+		Object a = new Object();
+		Object b = new Object();
+		
+		Thread t1 = new Thread(() -> {
+			// Body of the thread
+			synchronized (a) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				synchronized (b) {
+					System.out.println(Thread.currentThread().getName()+" I want "+a+" and "+b+"to do something");
+				}
+				
+			}
+		}, "T1");
+		
+		Thread t2 = new Thread(() -> {
+			synchronized (b) {
+				System.out.println("The current state of T1 Thread is "+ t1.getState());
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				synchronized (a) {
+					System.out.println(Thread.currentThread().getName()+" I want "+b+" and "+a+"to do something");
+				}
+				
+			}
+			
+		}, "T2");
+		
+		t1.start();
+		t2.start();
+		
+		try {
+			Thread.sleep(1100);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println("The current state of T1 Thread is "+ t1.getState());
+		System.out.println("The current state of T2 Thread is "+ t2.getState());
+
+	}
+
+}
